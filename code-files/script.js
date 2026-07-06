@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initReveal();
   initHeroCanvas();
   initTimeline();
-  initVisitorCounter();
   initFooterYear();
 });
 
@@ -81,7 +80,7 @@ function initNav() {
    ------------------------------------------------------------------------- */
 function initReveal() {
   const targets = document.querySelectorAll(
-    ".service-card, .feature-card, .demo-card, .flow-steps li, .architecture-frame, .section-eyebrow, .section-title, .section-lead"
+    ".service-card, .feature-card, .flow-steps li, .architecture-frame, .section-eyebrow, .section-title, .section-lead"
   );
   if (!targets.length) return;
 
@@ -239,85 +238,7 @@ function initTimeline() {
 }
 
 /* -------------------------------------------------------------------------
-   6. Live visitor counter — calls the serverless API Gateway endpoint and
-      renders whatever DynamoDB returns. No number is ever hardcoded here.
-
-   To go live: replace API_ENDPOINT below with your own API Gateway
-   invoke URL, e.g. https://abc123.execute-api.ap-south-1.amazonaws.com/visit
-   ------------------------------------------------------------------------- */
-function initVisitorCounter() {
-  const API_ENDPOINT = "https://YOUR_API_GATEWAY_URL/visit";
-
-  const countEl = document.getElementById("visitor-count");
-  const statusDot = document.getElementById("demo-status-dot");
-  const statusText = document.getElementById("demo-status-text");
-  const latencyEl = document.getElementById("demo-latency");
-  const noteEl = document.getElementById("demo-note");
-  const refreshBtn = document.getElementById("refresh-btn");
-  const heroStatusDot = document.getElementById("hero-status-dot");
-
-  if (!countEl) return;
-
-  async function fetchCount() {
-    refreshBtn && refreshBtn.classList.add("is-spinning");
-    statusText.textContent = "Connecting to API…";
-    const started = performance.now();
-
-    try {
-      const res = await fetch(API_ENDPOINT, { method: "GET" });
-      if (!res.ok) throw new Error(`API responded ${res.status}`);
-      const data = await res.json();
-
-      // Expecting a JSON body shaped like { count: number }. Adjust the
-      // key below if your Lambda returns a different field name.
-      const count = Number(data.count ?? data.visitorCount ?? data.visits);
-      if (Number.isNaN(count)) throw new Error("Unexpected response shape");
-
-      renderCount(count.toLocaleString());
-      setStatus(true, "Live — connected to API Gateway");
-      latencyEl.textContent = `${Math.round(performance.now() - started)} ms`;
-      noteEl.textContent = "This number is fetched live from your deployed API on every page load.";
-    } catch (err) {
-      // Expected until API_ENDPOINT above is pointed at a real deployment.
-      // Falls back to an honest, clearly-labeled local demo count rather
-      // than ever hardcoding a fixed visitor number.
-      runDemoFallback();
-      setStatus(false, "Demo mode — API endpoint not connected");
-      latencyEl.textContent = "demo";
-      noteEl.textContent = `Couldn't reach ${API_ENDPOINT}. Showing a local demo count until it's wired up.`;
-    } finally {
-      refreshBtn && refreshBtn.classList.remove("is-spinning");
-    }
-  }
-
-  function runDemoFallback() {
-    // A transparent, non-hardcoded stand-in: increments per visit in this
-    // browser only, using localStorage, and is clearly labeled as a demo.
-    const key = "serverless-dashboard-demo-count";
-    const current = Number(localStorage.getItem(key) || 0) + 1;
-    localStorage.setItem(key, String(current));
-    renderCount(current.toLocaleString());
-  }
-
-  function renderCount(value) {
-    countEl.textContent = value;
-    countEl.parentElement.classList.remove("is-error");
-  }
-
-  function setStatus(isLive, message) {
-    statusText.textContent = message;
-    [statusDot, heroStatusDot].forEach((dot) => {
-      if (!dot) return;
-      dot.classList.toggle("is-error", !isLive);
-    });
-  }
-
-  refreshBtn && refreshBtn.addEventListener("click", fetchCount);
-  fetchCount();
-}
-
-/* -------------------------------------------------------------------------
-   7. Footer year
+   6. Footer year
    ------------------------------------------------------------------------- */
 function initFooterYear() {
   const el = document.getElementById("footer-year");

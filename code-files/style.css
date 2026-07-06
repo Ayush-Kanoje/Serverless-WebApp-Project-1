@@ -371,28 +371,6 @@ h1, h2, h3, h4 {
   transform: translateY(-2px);
 }
 
-.hero-stats {
-  display: flex;
-  justify-content: center;
-  gap: clamp(24px, 5vw, 56px);
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: rise 0.8s var(--ease) 0.58s forwards;
-}
-.hero-stat { text-align: center; }
-.hero-stat dt {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  margin-bottom: 6px;
-  max-width: 140px;
-}
-.hero-stat dd {
-  font-family: var(--font-mono);
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 @keyframes rise {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -470,7 +448,7 @@ h1, h2, h3, h4 {
   gap: 20px;
 }
 
-.service-card, .feature-card, .demo-card {
+.service-card, .feature-card {
   background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
@@ -551,105 +529,6 @@ h1, h2, h3, h4 {
 }
 .flow-steps h4 { font-size: 0.98rem; margin-bottom: 5px; }
 .flow-steps p { color: var(--text-secondary); font-size: 0.88rem; }
-
-/* =========================================================================
-   Live demo card
-   ========================================================================= */
-.demo-card {
-  padding: 36px clamp(24px, 5vw, 48px);
-  border-radius: var(--radius-lg);
-  max-width: 720px;
-  margin: 0 auto;
-}
-.demo-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.demo-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.btn-refresh {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-glass-strong);
-  padding: 7px 14px;
-  border-radius: 100px;
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
-}
-.btn-refresh:hover { color: var(--text-primary); border-color: var(--blue); }
-.btn-refresh.is-spinning svg { animation: spin 0.7s linear; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.demo-count-wrap {
-  text-align: center;
-  padding: 36px 0 32px;
-  border-top: 1px solid var(--border-glass);
-  border-bottom: 1px solid var(--border-glass);
-  margin-bottom: 28px;
-}
-.demo-count-label {
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-  margin-bottom: 10px;
-}
-.demo-count {
-  font-family: var(--font-mono);
-  font-size: clamp(2.6rem, 8vw, 4rem);
-  font-weight: 600;
-  background: linear-gradient(100deg, var(--text-primary), var(--blue) 120%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  line-height: 1;
-}
-.demo-count.is-error { background: none; color: var(--orange); font-size: clamp(1.1rem, 3vw, 1.4rem); }
-
-.demo-meta {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 24px;
-}
-.demo-meta-item {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-}
-.demo-meta-key {
-  display: block;
-  font-size: 11px;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
-.demo-meta-val { font-size: 12.5px; color: var(--text-primary); }
-
-.demo-note {
-  font-size: 12.5px;
-  color: var(--text-tertiary);
-  text-align: center;
-}
-.demo-note code {
-  background: rgba(255,255,255,0.06);
-  padding: 1px 6px;
-  border-radius: 4px;
-}
 
 /* =========================================================================
    Feature cards
@@ -837,13 +716,10 @@ h1, h2, h3, h4 {
   }
 
   .hero { padding-top: 120px; }
-  .hero-stats { gap: 28px; }
 
   .card-grid { grid-template-columns: 1fr; }
   .flow-steps { grid-template-columns: 1fr; }
   .features-grid { grid-template-columns: 1fr; }
-
-  .demo-meta { grid-template-columns: 1fr; }
 
   .timeline {
     flex-direction: column;
@@ -870,5 +746,4 @@ h1, h2, h3, h4 {
 @media (max-width: 480px) {
   .hero-title { font-size: 2rem; }
   .btn { padding: 12px 18px; font-size: 13.5px; }
-  .demo-card { padding: 28px 20px; }
 }

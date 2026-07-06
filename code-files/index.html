@@ -34,7 +34,6 @@
       <nav class="nav-links" aria-label="Primary">
         <a href="#services">Services</a>
         <a href="#architecture">Architecture</a>
-        <a href="#live-demo">Live Demo</a>
         <a href="#features">Features</a>
         <a href="#timeline">Request Flow</a>
       </nav>
@@ -75,21 +74,6 @@
           GitHub Repository
         </a>
       </div>
-
-      <dl class="hero-stats">
-        <div class="hero-stat">
-          <dt>Compute servers managed</dt>
-          <dd><span class="mono">0</span></dd>
-        </div>
-        <div class="hero-stat">
-          <dt>Services wired together</dt>
-          <dd><span class="mono">6</span></dd>
-        </div>
-        <div class="hero-stat">
-          <dt>Monthly cost at this scale</dt>
-          <dd><span class="mono">~$0</span></dd>
-        </div>
-      </dl>
     </div>
 
     <a href="#services" class="scroll-cue" aria-label="Scroll to services">
@@ -233,57 +217,6 @@
             </div>
           </li>
         </ol>
-      </div>
-    </section>
-
-    <!-- ================= LIVE VISITOR COUNTER ================= -->
-    <section class="section" id="live-demo">
-      <div class="section-inner">
-        <p class="section-eyebrow">Live demo</p>
-        <h2 class="section-title">This counter is real</h2>
-        <p class="section-lead">
-          Every page load calls the live API Gateway endpoint below. The number
-          you see is read straight out of DynamoDB — refresh the page and watch it move.
-        </p>
-
-        <div class="demo-card">
-          <div class="demo-card-top">
-            <span class="demo-label">
-              <span class="status-dot" id="demo-status-dot"></span>
-              <span id="demo-status-text">Connecting to API&hellip;</span>
-            </span>
-            <button class="btn-refresh" id="refresh-btn" type="button" aria-label="Refresh visitor count">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.74 10h-2.09A6 6 0 1 1 12 6a5.94 5.94 0 0 1 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>
-              Refresh
-            </button>
-          </div>
-
-          <div class="demo-count-wrap">
-            <p class="demo-count-label">Total visitors</p>
-            <p class="demo-count">
-              <span id="visitor-count">Loading&hellip;</span>
-            </p>
-          </div>
-
-          <div class="demo-meta">
-            <div class="demo-meta-item">
-              <span class="demo-meta-key">Endpoint</span>
-              <code class="demo-meta-val">GET /visit</code>
-            </div>
-            <div class="demo-meta-item">
-              <span class="demo-meta-key">Data source</span>
-              <code class="demo-meta-val">DynamoDB</code>
-            </div>
-            <div class="demo-meta-item">
-              <span class="demo-meta-key">Last response</span>
-              <code class="demo-meta-val" id="demo-latency">&mdash;</code>
-            </div>
-          </div>
-
-          <p class="demo-note" id="demo-note">
-            Point <code>script.js</code> at your own API Gateway URL to make this live on your deployment.
-          </p>
-        </div>
       </div>
     </section>
 
