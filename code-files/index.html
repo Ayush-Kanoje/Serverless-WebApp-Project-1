@@ -3,357 +3,165 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AWS Serverless Visitor Analytics Dashboard</title>
-  <meta name="description" content="A live demonstration of a fully serverless architecture on AWS — S3, CloudFront, API Gateway, Lambda, DynamoDB and IAM working together." />
-
-  <!-- Typefaces: Space Grotesk for display, IBM Plex Sans for body, IBM Plex Mono for data/console text -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
+  <title>Serverless Visitor Counter — AWS Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="page">
 
-  <!-- ================= LOADING SCREEN ================= -->
-  <div id="preloader" aria-hidden="true">
-    <div class="preloader-inner">
-      <span class="preloader-bracket">[</span>
-      <span class="preloader-text" id="preloader-text">INITIALIZING STACK</span>
-      <span class="preloader-bracket">]</span>
-    </div>
+    <!-- ============ TOP BAR ============ -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot" id="status-dot"></span>
+        <span class="brand-text">visitor-counter<span class="brand-dim">.aws</span></span>
+      </div>
+      <a class="gh-btn" href="https://github.com/Ayush-Kanoje" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38
+                   0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                   -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                   .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                   -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.5 7.5 0 0 1 4 0c1.53-1.04
+                   2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87
+                   3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38
+                   A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+        </svg>
+        View source
+      </a>
+    </header>
+
+    <main>
+      <!-- ============ HERO ============ -->
+      <section class="hero">
+        <p class="eyebrow">AWS Free Tier &middot; Zero servers &middot; Zero idle cost</p>
+        <h1>Every visit triggers a real<br />serverless round trip.</h1>
+        <p class="hero-sub">
+          No app server, no container, no always-on process. Static assets are delivered
+          straight from S3 through CloudFront. The counter you're about to see below comes
+          from an actual API Gateway → Lambda → DynamoDB call, fired the moment this page loaded.
+        </p>
+      </section>
+
+      <!-- ============ REQUEST TRACE DIAGRAM ============ -->
+      <section class="trace-section" aria-label="Request path diagram">
+        <svg id="trace-svg" viewBox="0 0 920 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="trace-title">
+          <title id="trace-title">Request path from browser through AWS services</title>
+
+          <!-- connecting lines -->
+          <path id="path-assets" class="trace-line" d="M 120 70 H 420" />
+          <path id="path-api-1"  class="trace-line" d="M 120 190 H 300" />
+          <path id="path-api-2"  class="trace-line" d="M 300 190 H 480" />
+          <path id="path-api-3"  class="trace-line" d="M 480 190 H 660" />
+          <path id="path-api-4"  class="trace-line" d="M 660 190 H 840" />
+
+          <!-- traveling pulse dots (hidden until JS fires them) -->
+          <circle id="pulse-assets" class="pulse" r="5" cx="120" cy="70" />
+          <circle id="pulse-api" class="pulse pulse-accent" r="5" cx="120" cy="190" />
+
+          <!-- Node: Browser -->
+          <g class="node">
+            <rect x="30" y="105" width="150" height="60" rx="10" />
+            <text x="105" y="130" class="node-title">Browser</text>
+            <text x="105" y="148" class="node-sub">loads page</text>
+          </g>
+
+          <!-- Node: CloudFront -->
+          <g class="node node-line1">
+            <rect x="360" y="40" width="130" height="60" rx="10" />
+            <text x="425" y="65" class="node-title">CloudFront</text>
+            <text x="425" y="83" class="node-sub">HTTPS CDN</text>
+          </g>
+
+          <!-- Node: S3 -->
+          <g class="node node-line1">
+            <rect x="710" y="40" width="130" height="60" rx="10" />
+            <text x="775" y="65" class="node-title">S3</text>
+            <text x="775" y="83" class="node-sub">static files</text>
+          </g>
+          <path class="trace-line" d="M 490 70 H 710" />
+          <circle class="pulse-dim" r="4" cx="490" cy="70" />
+
+          <!-- Node: API Gateway -->
+          <g class="node node-line2">
+            <rect x="230" y="160" width="140" height="60" rx="10" />
+            <text x="300" y="185" class="node-title">API Gateway</text>
+            <text x="300" y="203" class="node-sub">/visitor</text>
+          </g>
+
+          <!-- Node: Lambda -->
+          <g class="node node-line2">
+            <rect x="410" y="160" width="140" height="60" rx="10" />
+            <text x="480" y="185" class="node-title">Lambda</text>
+            <text x="480" y="203" class="node-sub">Python 3.12</text>
+          </g>
+
+          <!-- Node: DynamoDB -->
+          <g class="node node-line2">
+            <rect x="590" y="160" width="140" height="60" rx="10" />
+            <text x="660" y="185" class="node-title">DynamoDB</text>
+            <text x="660" y="203" class="node-sub">count += 1</text>
+          </g>
+
+          <!-- labels -->
+          <text x="105" y="235" class="path-label">static assets</text>
+          <text x="480" y="245" class="path-label path-label-accent">counter API call</text>
+        </svg>
+        <p class="trace-caption" id="trace-caption">Waiting for the counter request…</p>
+      </section>
+
+      <!-- ============ COUNTER ============ -->
+      <section class="counter-section">
+        <div class="counter-box">
+          <span id="counter">--</span>
+          <p class="label">total visits, straight from DynamoDB</p>
+        </div>
+        <p id="status" class="status">Connecting...</p>
+      </section>
+
+      <!-- ============ SERVICES ============ -->
+      <section class="stack-section">
+        <p class="section-label">Services used — 100% AWS Free Tier</p>
+        <div class="stack-row">
+          <span class="chip">S3</span>
+          <span class="chip">CloudFront</span>
+          <span class="chip">API Gateway (HTTP API)</span>
+          <span class="chip">Lambda</span>
+          <span class="chip">DynamoDB</span>
+        </div>
+      </section>
+
+      <!-- ============ ENGINEERING LOG ============ -->
+      <section class="log-section">
+        <p class="section-label">Engineering log — real issues hit while shipping this</p>
+
+        <div class="log-entry">
+          <div class="log-row"><span class="log-tag issue">ISSUE</span><span>CloudFront served <code>AccessDenied</code> from S3 even with a valid Origin Access Control.</span></div>
+          <div class="log-row"><span class="log-tag cause">CAUSE</span><span>The OAC had been recreated a few times; the bucket policy still pointed at a stale distribution reference.</span></div>
+          <div class="log-row"><span class="log-tag fix">FIX</span><span>Created one clean OAC, let CloudFront auto-generate the matching bucket policy, then invalidated the cache.</span></div>
+        </div>
+
+        <div class="log-entry">
+          <div class="log-row"><span class="log-tag issue">ISSUE</span><span>Attaching Lambda as an API Gateway trigger created the wrong route.</span></div>
+          <div class="log-row"><span class="log-tag cause">CAUSE</span><span>The "Add trigger" flow auto-names routes after the function, not the path the frontend actually calls.</span></div>
+          <div class="log-row"><span class="log-tag fix">FIX</span><span>Created <code>GET /visitor</code> manually in Routes and attached the Lambda integration directly to it.</span></div>
+        </div>
+
+        <div class="log-entry">
+          <div class="log-row"><span class="log-tag issue">ISSUE</span><span>The <code>$default</code> stage looked "undeployed" and couldn't be selected in the deploy dialog.</span></div>
+          <div class="log-row"><span class="log-tag cause">CAUSE</span><span>Auto-deploy was already on — HTTP APIs deploy themselves on every change, so manual deploy is disabled by design.</span></div>
+          <div class="log-row"><span class="log-tag fix">FIX</span><span>No action needed — confirmed changes were live via a direct <code>curl</code> to the invoke URL instead.</span></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Built with S3 · CloudFront · API Gateway · Lambda · DynamoDB</span>
+      <a href="https://github.com/Ayush-Kanoje" target="_blank" rel="noopener">github.com/Ayush-Kanoje</a>
+    </footer>
   </div>
-
-  <!-- ================= NAV ================= -->
-  <header class="nav" id="nav">
-    <div class="nav-inner">
-      <a href="#top" class="nav-brand">
-        <span class="nav-brand-dot" aria-hidden="true"></span>
-        <span class="nav-brand-text">serverless<em>.</em>dashboard</span>
-      </a>
-      <nav class="nav-links" aria-label="Primary">
-        <a href="#services">Services</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#features">Features</a>
-        <a href="#timeline">Request Flow</a>
-      </nav>
-      <a href="https://github.com/Ayush-Kanoje/Serverless-WebApp-Project-1" class="nav-cta" id="nav-github" target="_blank" rel="noopener">
-        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-        GitHub
-      </a>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-
-  <!-- ================= HERO ================= -->
-  <section class="hero" id="top">
-    <canvas id="hero-canvas" aria-hidden="true"></canvas>
-    <div class="hero-grid-overlay" aria-hidden="true"></div>
-
-    <div class="hero-content">
-      <p class="eyebrow"><span class="status-dot" id="hero-status-dot"></span>us-east-1 &middot; all systems provisioned</p>
-      <h1 class="hero-title">
-        AWS Serverless<br />
-        Visitor Analytics <span class="text-gradient">Dashboard</span>
-      </h1>
-      <p class="hero-subtitle">
-        A live, working demonstration of a fully serverless architecture hosted
-        entirely on AWS — private static hosting behind CloudFront, and a
-        REST API on API Gateway and Lambda writing real visit counts to DynamoDB.
-        No servers to patch. No idle compute to pay for.
-      </p>
-      <div class="hero-actions">
-        <a href="#architecture" class="btn btn-primary">
-          View Architecture
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 16.5 4.5 9l1.4-1.4L12 13.7l6.1-6.1L19.5 9z"/></svg>
-        </a>
-        <a href="https://github.com/Ayush-Kanoje/Serverless-WebApp-Project-1" class="btn btn-secondary" id="hero-github" target="_blank" rel="noopener">
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-          GitHub Repository
-        </a>
-      </div>
-    </div>
-
-    <a href="#services" class="scroll-cue" aria-label="Scroll to services">
-      <span></span>
-    </a>
-  </section>
-
-  <main>
-    <!-- ================= AWS SERVICES ================= -->
-    <section class="section" id="services">
-      <div class="section-inner">
-        <p class="section-eyebrow">The stack</p>
-        <h2 class="section-title">Six managed services, one architecture</h2>
-        <p class="section-lead">
-          Every moving part in this project is a fully managed AWS service.
-          Here's what each one is responsible for.
-        </p>
-
-        <div class="card-grid" id="services-grid">
-          <!-- Cards injected/enhanced via script.js for stagger animation, static markup below for no-JS fallback -->
-          <article class="service-card" data-accent="orange">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 2 3 6v6c0 5 4 9 9 10 5-1 9-5 9-10V6l-9-4Zm0 2.2 7 3.1v4.5c0 4-3 7.3-7 8.2-4-.9-7-4.2-7-8.2V7.3l7-3.1Z"/><path fill="currentColor" d="M8.5 12.2 7 13.7l3.6 3.6L17.2 10 15.7 8.5l-5.1 5.1z"/></svg>
-            </div>
-            <h3>Amazon S3</h3>
-            <p class="service-role">Private static host</p>
-            <p>Stores the dashboard's HTML, CSS and JS as a private bucket — no public bucket policy, no direct internet access. Content only leaves the bucket through CloudFront.</p>
-          </article>
-
-          <article class="service-card" data-accent="orange">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 2c1.5 0 2.9.4 4.1 1.1L12 9.5 7.9 5.1A8 8 0 0 1 12 4Zm-6.9 2.7L9.5 11l-4.4 4.3A8 8 0 0 1 4 12a8 8 0 0 1 1.1-5.3ZM12 20a8 8 0 0 1-4.1-1.1L12 14.5l4.1 4.4A8 8 0 0 1 12 20Zm6.9-2.7L14.5 13l4.4-4.3A8 8 0 0 1 20 12a8 8 0 0 1-1.1 5.3Z"/></svg>
-            </div>
-            <h3>Amazon CloudFront</h3>
-            <p class="service-role">Global edge delivery</p>
-            <p>Sits in front of S3 as the only public entry point, caching assets at edge locations worldwide and enforcing HTTPS via Origin Access Control on every request.</p>
-          </article>
-
-          <article class="service-card" data-accent="blue">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm10.5 0a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>
-            </div>
-            <h3>API Gateway</h3>
-            <p class="service-role">Managed REST endpoint</p>
-            <p>Exposes the <code>/visit</code> route the browser calls to read and increment the counter, handling throttling, CORS and request validation before anything reaches compute.</p>
-          </article>
-
-          <article class="service-card" data-accent="orange">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M13 2 3 14h7l-1 8 11-14h-8l1-6Z"/></svg>
-            </div>
-            <h3>AWS Lambda</h3>
-            <p class="service-role">Event-driven compute</p>
-            <p>Runs the function that handles each API Gateway request, reads and writes the count in DynamoDB, and returns a JSON response — with zero servers idling between visits.</p>
-          </article>
-
-          <article class="service-card" data-accent="blue">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 3c-4.4 0-8 1.1-8 2.5v13c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-13C20 4.1 16.4 3 12 3Zm0 2c3.6 0 6 .9 6 1.5S15.6 8 12 8s-6-.9-6-1.5S8.4 5 12 5Zm-6 4.2c1.4.7 3.6 1.1 6 1.1s4.6-.4 6-1.1v2.7c0 .6-2.4 1.5-6 1.5s-6-.9-6-1.5V9.2Zm0 4.7c1.4.7 3.6 1.1 6 1.1s4.6-.4 6-1.1v2.6c0 .6-2.4 1.5-6 1.5s-6-.9-6-1.5v-2.6Z"/></svg>
-            </div>
-            <h3>Amazon DynamoDB</h3>
-            <p class="service-role">Serverless NoSQL store</p>
-            <p>Holds a single item tracking total visits, updated atomically on every request. Scales automatically with traffic and needs no capacity planning at this size.</p>
-          </article>
-
-          <article class="service-card" data-accent="gray">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 1 4 4v6c0 5.6 3.4 9.9 8 11 4.6-1.1 8-5.4 8-11V4l-8-3Zm0 4a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Zm0 12.5c-2 0-3.8-1-4.8-2.6.1-1.5 2.5-2.4 4.8-2.4s4.7.9 4.8 2.4c-1 1.6-2.8 2.6-4.8 2.6Z"/></svg>
-            </div>
-            <h3>IAM</h3>
-            <p class="service-role">Least-privilege access</p>
-            <p>Every service gets a narrowly scoped role: Lambda can only touch the one DynamoDB table it needs, and CloudFront is the only principal allowed to read from S3.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= ARCHITECTURE ================= -->
-    <section class="section section-alt" id="architecture">
-      <div class="section-inner">
-        <p class="section-eyebrow">How it fits together</p>
-        <h2 class="section-title">Request flow, end to end</h2>
-        <p class="section-lead">
-          One diagram, two paths: static assets flow through CloudFront and S3,
-          while live data flows through API Gateway, Lambda and DynamoDB.
-        </p>
-
-        <div class="architecture-frame">
-          <img
-            src="../image/architecture.png"
-            alt="Diagram of the serverless request flow: User to CloudFront to private S3 for static content, and User to API Gateway to Lambda to DynamoDB for live visitor data, all governed by IAM."
-            width="1350"
-            height="820"
-            loading="lazy"
-            decoding="async"
-            class="architecture-img"
-          />
-        </div>
-
-        <ol class="flow-steps">
-          <li>
-            <span class="flow-index">01</span>
-            <div>
-              <h4>User requests the dashboard</h4>
-              <p>The browser sends an HTTPS request to the CloudFront distribution's domain — never directly to S3.</p>
-            </div>
-          </li>
-          <li>
-            <span class="flow-index">02</span>
-            <div>
-              <h4>CloudFront fetches from private S3</h4>
-              <p>Origin Access Control lets CloudFront read the bucket while every other path to it stays blocked.</p>
-            </div>
-          </li>
-          <li>
-            <span class="flow-index">03</span>
-            <div>
-              <h4>Browser renders the page</h4>
-              <p>HTML, CSS and this JavaScript file load and run locally, then the page calls the live API.</p>
-            </div>
-          </li>
-          <li>
-            <span class="flow-index">04</span>
-            <div>
-              <h4>API Gateway receives the call</h4>
-              <p>The <code>/visit</code> route validates the request and forwards it to a Lambda function.</p>
-            </div>
-          </li>
-          <li>
-            <span class="flow-index">05</span>
-            <div>
-              <h4>Lambda runs the logic</h4>
-              <p>A short-lived function increments the count and reads back the current total.</p>
-            </div>
-          </li>
-          <li>
-            <span class="flow-index">06</span>
-            <div>
-              <h4>DynamoDB persists the count</h4>
-              <p>The updated total is written to a single table item and returned to the browser as JSON.</p>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- ================= FEATURES ================= -->
-    <section class="section section-alt" id="features">
-      <div class="section-inner">
-        <p class="section-eyebrow">Why serverless</p>
-        <h2 class="section-title">What this architecture buys you</h2>
-
-        <div class="card-grid features-grid">
-          <article class="feature-card">
-            <svg class="feature-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            <div>
-              <h3>Fully serverless</h3>
-              <p>No EC2 instances, no OS patching, nothing running when nobody's visiting.</p>
-            </div>
-          </article>
-          <article class="feature-card">
-            <svg class="feature-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            <div>
-              <h3>Private S3 with OAC</h3>
-              <p>The bucket has no public access at all — only CloudFront can read from it.</p>
-            </div>
-          </article>
-          <article class="feature-card">
-            <svg class="feature-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            <div>
-              <h3>Global CDN via CloudFront</h3>
-              <p>Assets are cached at edge locations, so load times stay low anywhere in the world.</p>
-            </div>
-          </article>
-          <article class="feature-card">
-            <svg class="feature-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            <div>
-              <h3>HTTPS enabled</h3>
-              <p>Every request, static or API, is encrypted end to end by default.</p>
-            </div>
-          </article>
-          <article class="feature-card">
-            <svg class="feature-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            <div>
-              <h3>Highly scalable</h3>
-              <p>Lambda and DynamoDB scale from zero to spikes automatically, no capacity planning.</p>
-            </div>
-          </article>
-          <article class="feature-card">
-            <svg class="feature-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            <div>
-              <h3>Cost optimized</h3>
-              <p>You pay per request, not per hour — idle traffic costs effectively nothing.</p>
-            </div>
-          </article>
-          <article class="feature-card">
-            <svg class="feature-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            <div>
-              <h3>AWS Free Tier friendly</h3>
-              <p>Comfortably runs a small project like this within the Free Tier's monthly limits.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= REQUEST FLOW TIMELINE ================= -->
-    <section class="section" id="timeline">
-      <div class="section-inner">
-        <p class="section-eyebrow">Traced live</p>
-        <h2 class="section-title">One request, six hops</h2>
-        <p class="section-lead">Watch a single request travel the full path in real time.</p>
-
-        <div class="timeline" id="timeline-track">
-          <div class="timeline-line" aria-hidden="true"></div>
-          <div class="timeline-pulse" id="timeline-pulse" aria-hidden="true"></div>
-
-          <div class="timeline-node" data-index="01">
-            <span class="timeline-dot"></span>
-            <span class="timeline-label">User</span>
-          </div>
-          <div class="timeline-node" data-index="02">
-            <span class="timeline-dot"></span>
-            <span class="timeline-label">CloudFront</span>
-          </div>
-          <div class="timeline-node" data-index="03">
-            <span class="timeline-dot"></span>
-            <span class="timeline-label">S3</span>
-          </div>
-          <div class="timeline-node" data-index="04">
-            <span class="timeline-dot"></span>
-            <span class="timeline-label">API Gateway</span>
-          </div>
-          <div class="timeline-node" data-index="05">
-            <span class="timeline-dot"></span>
-            <span class="timeline-label">Lambda</span>
-          </div>
-          <div class="timeline-node" data-index="06">
-            <span class="timeline-dot"></span>
-            <span class="timeline-label">DynamoDB</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ================= FOOTER ================= -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <span class="nav-brand-dot" aria-hidden="true"></span>
-        <p class="footer-brand-text">serverless<em>.</em>dashboard</p>
-        <p class="footer-tagline">A cloud engineering project built entirely on managed AWS services.</p>
-      </div>
-
-      <div class="footer-links">
-        <a href="https://github.com/Ayush-Kanoje/Serverless-WebApp-Project-1" target="_blank" rel="noopener" class="footer-link" id="footer-github">
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-          GitHub
-        </a>
-        <a href="#" target="_blank" rel="noopener" class="footer-link" id="footer-linkedin">
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M14.82 0H1.18C.53 0 0 .53 0 1.18v13.64C0 15.47.53 16 1.18 16h13.64c.65 0 1.18-.53 1.18-1.18V1.18C16 .53 15.47 0 14.82 0ZM4.75 13.4H2.4V6h2.35v7.4ZM3.58 5.02a1.36 1.36 0 1 1 0-2.72 1.36 1.36 0 0 1 0 2.72ZM13.6 13.4h-2.35V9.8c0-.86-.02-1.96-1.2-1.96-1.2 0-1.39.94-1.39 1.9v3.66H6.32V6h2.26v1.01h.03c.31-.59 1.08-1.2 2.22-1.2 2.38 0 2.77 1.56 2.77 3.6v3.99Z"/></svg>
-          LinkedIn
-        </a>
-        <a href="mailto:you@example.com" class="footer-link" id="footer-email">
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M1.5 3h13A1.5 1.5 0 0 1 16 4.5v7A1.5 1.5 0 0 1 14.5 13h-13A1.5 1.5 0 0 1 0 11.5v-7A1.5 1.5 0 0 1 1.5 3Zm.4 1.4L8 8.6l6.1-4.2H1.9ZM14.6 5.6 8.3 9.9a.6.6 0 0 1-.6 0L1.4 5.6v5.9c0 .06.04.1.1.1h13a.1.1 0 0 0 .1-.1V5.6Z"/></svg>
-          Email
-        </a>
-      </div>
-
-      <div class="footer-stack">
-        <span class="footer-stack-label">Built with</span>
-        <div class="footer-tags">
-          <span>S3</span><span>CloudFront</span><span>API Gateway</span>
-          <span>Lambda</span><span>DynamoDB</span><span>IAM</span>
-        </div>
-      </div>
-    </div>
-    <p class="footer-credit">Designed &amp; engineered as a personal AWS cloud project &middot; <span id="footer-year"></span></p>
-  </footer>
 
   <script src="script.js"></script>
 </body>
