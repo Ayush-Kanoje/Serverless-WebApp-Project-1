@@ -3,163 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Serverless Visitor Counter — AWS Architecture</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Serverless Visitor Counter</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="page">
+  <main class="card">
+    <h1>Serverless Visitor Counter</h1>
+    <p class="subtitle">S3 &middot; CloudFront &middot; API Gateway &middot; Lambda &middot; DynamoDB</p>
 
-    <header class="topbar">
-      <div class="brand">
-        <span class="dot" id="status-dot"></span>
-        <span class="brand-text">visitor-counter<span class="brand-dim">.aws</span></span>
-      </div>
-      <a class="gh-btn" href="https://github.com/Ayush-Kanoje/Serverless-WebApp-Project-1" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-          <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38
-                   0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
-                   -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
-                   .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
-                   -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.5 7.5 0 0 1 4 0c1.53-1.04
-                   2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87
-                   3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38
-                   A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+    <div class="counter-box">
+      <span id="counter">--</span>
+      <p class="label">total visits</p>
+    </div>
+
+    <p id="status" class="status">Connecting...</p>
+    
+    <div class="actions">
+      <a href="https://github.com/Ayush-Kanoje/Serverless-WebApp-Project-1" class="github-btn" target="_blank" rel="noopener noreferrer">
+        <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
         </svg>
-        visit source repo
+        View on GitHub
       </a>
-    </header>
+    </div>
+  </main>
 
-    <main>
-      <!-- ============ HERO ============ -->
-      <section class="hero">
-        <p class="eyebrow">AWS Free Tier &middot; Zero servers &middot; Zero idle cost</p>
-        <h1>Every visit triggers a real<br />serverless round trip.</h1>
-        <p class="hero-sub">
-          No app server, no container, no always-on process. Static assets are delivered
-          straight from S3 through CloudFront. The counter you're about to see below comes
-          from an actual API Gateway → Lambda → DynamoDB call, fired the moment this page loaded.
-        </p>
-      </section>
+  <div class="row-container">
+    <section class="architecture-card">
+      <h2>AWS Architecture</h2>
+      <img src="../image/architecture.png" alt="AWS Architecture Diagram" class="architecture-img clickable-img" id="arch-img" />
+    </section>
 
-      <!-- ============ REQUEST TRACE DIAGRAM ============ -->
-      <section class="trace-section" aria-label="Request path diagram">
-        <svg id="trace-svg" viewBox="0 0 920 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="trace-title">
-          <title id="trace-title">Request path from browser through AWS services</title>
-
-          <!-- connecting lines -->
-          <path id="path-assets" class="trace-line" d="M 120 70 H 420" />
-          <path id="path-api-1"  class="trace-line" d="M 120 190 H 300" />
-          <path id="path-api-2"  class="trace-line" d="M 300 190 H 480" />
-          <path id="path-api-3"  class="trace-line" d="M 480 190 H 660" />
-          <path id="path-api-4"  class="trace-line" d="M 660 190 H 840" />
-
-          <!-- traveling pulse dots (hidden until JS fires them) -->
-          <circle id="pulse-assets" class="pulse" r="5" cx="120" cy="70" />
-          <circle id="pulse-api" class="pulse pulse-accent" r="5" cx="120" cy="190" />
-
-          <!-- Node: Browser -->
-          <g class="node">
-            <rect x="30" y="105" width="150" height="60" rx="10" />
-            <text x="105" y="130" class="node-title">Browser</text>
-            <text x="105" y="148" class="node-sub">loads page</text>
-          </g>
-
-          <!-- Node: CloudFront -->
-          <g class="node node-line1">
-            <rect x="360" y="40" width="130" height="60" rx="10" />
-            <text x="425" y="65" class="node-title">CloudFront</text>
-            <text x="425" y="83" class="node-sub">HTTPS CDN</text>
-          </g>
-
-          <!-- Node: S3 -->
-          <g class="node node-line1">
-            <rect x="710" y="40" width="130" height="60" rx="10" />
-            <text x="775" y="65" class="node-title">S3</text>
-            <text x="775" y="83" class="node-sub">static files</text>
-          </g>
-          <path class="trace-line" d="M 490 70 H 710" />
-          <circle class="pulse-dim" r="4" cx="490" cy="70" />
-
-          <!-- Node: API Gateway -->
-          <g class="node node-line2">
-            <rect x="230" y="160" width="140" height="60" rx="10" />
-            <text x="300" y="185" class="node-title">API Gateway</text>
-            <text x="300" y="203" class="node-sub">/visitor</text>
-          </g>
-
-          <!-- Node: Lambda -->
-          <g class="node node-line2">
-            <rect x="410" y="160" width="140" height="60" rx="10" />
-            <text x="480" y="185" class="node-title">Lambda</text>
-            <text x="480" y="203" class="node-sub">Python 3.12</text>
-          </g>
-
-          <!-- Node: DynamoDB -->
-          <g class="node node-line2">
-            <rect x="590" y="160" width="140" height="60" rx="10" />
-            <text x="660" y="185" class="node-title">DynamoDB</text>
-            <text x="660" y="203" class="node-sub">count += 1</text>
-          </g>
-
-          <!-- labels -->
-          <text x="105" y="235" class="path-label">static assets</text>
-          <text x="480" y="245" class="path-label path-label-accent">counter API call</text>
-        </svg>
-        <p class="trace-caption" id="trace-caption">Waiting for the counter request…</p>
-      </section>
-
-      <!-- ============ COUNTER ============ -->
-      <section class="counter-section">
-        <div class="counter-box">
-          <span id="counter">--</span>
-          <p class="label">total visits, straight from DynamoDB</p>
+    <section class="logs-card">
+      <h2>Troubleshooting Logs</h2>
+      <div class="logs-scroll">
+        <div class="log-item">
+          <h3>Issue: Couldn't delete CloudFront distribution after deleting the S3 bucket.</h3>
+          <p><strong>Cause:</strong> CloudFront still had the deleted S3 bucket configured as its origin.</p>
+          <p><strong>Fix:</strong> Disabled the distribution, updated/removed the origin configuration, waited for deployment, then deleted it.</p>
         </div>
-        <p id="status" class="status">Connecting...</p>
-      </section>
-
-      <!-- ============ SERVICES ============ -->
-      <section class="stack-section">
-        <p class="section-label">Services used — 100% AWS Free Tier</p>
-        <div class="stack-row">
-          <span class="chip">S3</span>
-          <span class="chip">CloudFront</span>
-          <span class="chip">API Gateway (HTTP API)</span>
-          <span class="chip">Lambda</span>
-          <span class="chip">DynamoDB</span>
+        
+        <div class="log-item">
+          <h3>Issue: Lambda couldn't access DynamoDB</h3>
+          <p><strong>Cause:</strong> Missing IAM permissions.</p>
+          <p><strong>Fix:</strong> Attached a least-privilege IAM policy allowing only the required DynamoDB actions.</p>
         </div>
-      </section>
-
-      <!-- ============ ENGINEERING LOG ============ -->
-      <section class="log-section">
-        <p class="section-label">Engineering log — real issues hit while shipping this</p>
-
-        <div class="log-entry">
-          <div class="log-row"><span class="log-tag issue">ISSUE</span><span>CloudFront served <code>AccessDenied</code> from S3 even with a valid Origin Access Control.</span></div>
-          <div class="log-row"><span class="log-tag cause">CAUSE</span><span>The OAC had been recreated a few times; the bucket policy still pointed at a stale distribution reference.</span></div>
-          <div class="log-row"><span class="log-tag fix">FIX</span><span>Created one clean OAC, let CloudFront auto-generate the matching bucket policy, then invalidated the cache.</span></div>
+        
+        <div class="log-item">
+          <h3>Issue: CloudFront returned "AccessDenied" from S3 despite a valid Origin Access Control.</h3>
+          <p><strong>Cause:</strong> Bucket policy was stale after recreating the OAC multiple times.</p>
+          <p><strong>Fix:</strong> Created one clean OAC and let CloudFront auto-generate the matching bucket policy.</p>
         </div>
-
-        <div class="log-entry">
-          <div class="log-row"><span class="log-tag issue">ISSUE</span><span>Attaching Lambda as an API Gateway trigger created the wrong route.</span></div>
-          <div class="log-row"><span class="log-tag cause">CAUSE</span><span>The "Add trigger" flow auto-names routes after the function, not the path the frontend actually calls.</span></div>
-          <div class="log-row"><span class="log-tag fix">FIX</span><span>Created <code>GET /visitor</code> manually in Routes and attached the Lambda integration directly to it.</span></div>
+        
+        <div class="log-item">
+          <h3>Issue: Created a second API Gateway stage to "confirm" $default was deployed, ending up with two live URLs.</h3>
+          <p><strong>Cause:</strong> Misunderstood stage creation as a verification step, when it's actually a separate deployment target.</p>
+          <p><strong>Fix:</strong> Confirmed both stages pointed to the same Lambda/DynamoDB backend via curl, then deleted the unnecessary stage and kept $default as the single source of truth.</p>
         </div>
+      </div>
+    </section>
+  </div>
 
-        <div class="log-entry">
-          <div class="log-row"><span class="log-tag issue">ISSUE</span><span>The <code>$default</code> stage looked "undeployed" and couldn't be selected in the deploy dialog.</span></div>
-          <div class="log-row"><span class="log-tag cause">CAUSE</span><span>Auto-deploy was already on — HTTP APIs deploy themselves on every change, so manual deploy is disabled by design.</span></div>
-          <div class="log-row"><span class="log-tag fix">FIX</span><span>No action needed — confirmed changes were live via a direct <code>curl</code> to the invoke URL instead.</span></div>
-        </div>
-      </section>
-    </main>
+  <section class="workflow-card">
+    <h2>Workflow Animation</h2>
+    <div class="workflow-animation">
+      <div class="step step-user">User</div>
+      <div class="arrow"></div>
+      <div class="step step-cf">CloudFront / S3</div>
+      <div class="arrow"></div>
+      <div class="step step-api">API Gateway</div>
+      <div class="arrow"></div>
+      <div class="step step-lambda">Lambda</div>
+      <div class="arrow"></div>
+      <div class="step step-db">DynamoDB</div>
+    </div>
+  </section>
 
-    <footer class="footer">
-      <span>Built with S3 · CloudFront · API Gateway · Lambda · DynamoDB</span>
-      <a class="gh-btn" href="https://github.com/Ayush-Kanoje/Serverless-WebApp-Project-1" target="_blank" rel="noopener">check Github Repo</a>
-    </footer>
+  <footer>
+    <p>Built with Serverless AWS Services &middot; Designed for High Availability</p>
+  </footer>
+
+  <div id="image-modal" class="modal">
+    <span class="close-modal" id="close-modal">&times;</span>
+    <img class="modal-content" id="modal-img">
   </div>
 
   <script src="script.js"></script>
