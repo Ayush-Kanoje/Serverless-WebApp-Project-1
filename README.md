@@ -8,7 +8,7 @@ This project is a hands-on exploration into the world of serverless cloud comput
 ## 🏗️ Architecture
 Here's a bird's-eye view of how all the pieces fit together:
 
-![AWS Architecture Diagram](Architecture-Dig/architecture.png)
+![AWS Architecture Diagram](Architecture-Dig/architecture_image2.png)
 
 ## 🛠️ AWS Services Used
 To make this work, I hooked up a few core AWS services:
@@ -56,7 +56,7 @@ Here is a peek behind the scenes at my AWS setup:
 ## 🧗 Challenges Faced
 Building this wasn't entirely smooth sailing. Here are some of the hurdles I hit and how I fixed them:
 
-- **The Stubborn CloudFront Distribution:** 
+- **The CloudFront Distribution:** 
   - *Issue:* I couldn't delete a CloudFront distribution after I had already deleted the S3 bucket it pointed to.
   - *Fix:* CloudFront still had the deleted bucket as its origin. I had to disable the distribution, remove the origin config, wait for the deployment to finish, and *then* delete it.
 - **Lambda's Database Block:** 
